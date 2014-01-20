@@ -1,0 +1,2 @@
+# Module power_outage_locator
+# RPC service class, partial path of RPC policy file
