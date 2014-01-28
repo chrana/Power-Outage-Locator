@@ -5,7 +5,16 @@
          version="2.5"
          xmlns="http://java.sun.com/xml/ns/javaee">
 
-  <!-- Servlets -->
+<!-- Servlets -->
+  <servlet>
+    <servlet-name>powerOutageServlet</servlet-name>
+    <servlet-class>com.power.outage.locator.server.PowerOutageServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>powerOutageServlet</servlet-name>
+    <url-pattern>/power_outage_locator/PowerOutageAsyncService</url-pattern>
+  </servlet-mapping>
 
   
   <!-- Default page to serve -->
