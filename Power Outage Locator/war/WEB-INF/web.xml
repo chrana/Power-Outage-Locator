@@ -15,6 +15,17 @@
     <servlet-name>powerOutageServlet</servlet-name>
     <url-pattern>/power_outage_locator/PowerOutageAsyncService</url-pattern>
   </servlet-mapping>
+  
+  
+    <servlet>
+    <servlet-name>AdminServlet</servlet-name>
+    <servlet-class>com.power.outage.locator.server.AdminServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>AdminServlet</servlet-name>
+    <url-pattern>/power_outage_locator_admin/AdminAsyncService</url-pattern>
+  </servlet-mapping>
 
   
   <!-- Default page to serve -->
