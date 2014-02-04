@@ -19,7 +19,7 @@ public class Functions {
 	private final String GET_COORDINATES_BY_AREA = "SELECT * FROM `powerplusdb`.`coordinates` WHERE `AreaName` = ?";
 	private final String GET_OUTAGE_BY_AREA = "SELECT * FROM `powerplusdb`.`outage` WHERE `AreaName` = ?";
 	private final String GET_NOTES_BY_AREA = "SELECT * FROM `powerplusdb`.`notes` INNER JOIN `powerplusdb`.`outage` ON `powerplusdb`.`notes`.`outageID` = `powerplusdb`.`outage`.`OutageID` WHERE `powerplusdb`.`outage`.`AreaName` = ? AND `powerplusdb`.`outage`.`OutageActive` = 1";
-	private final String AUTHENTICATE_USER = "CALL authenticateUser(?,?)";
+	private final String AUTHENTICATE_USER = "CALL authenticateUser(?)";
 
 	public Functions(String serverName, String dbContext, String userName,
 			String password) {
@@ -80,12 +80,11 @@ public class Functions {
 		return result;
 	}
 	
-	public ResultSet authenticate(String userName, String password) throws ClassNotFoundException, SQLException{
+	public ResultSet authenticate(String userName) throws ClassNotFoundException, SQLException{
 		connect();
 		
 		CallableStatement storedProcedureCall = connection.prepareCall(AUTHENTICATE_USER);
 		storedProcedureCall.setString(1, userName);
-		storedProcedureCall.setString(2, password);
 		ResultSet result = storedProcedureCall.executeQuery();
 		
 		return result;
