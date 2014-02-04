@@ -1,0 +1,2 @@
+# Module com.power.outage.locator.Power_Outage_Locator_Admin
+# RPC service class, partial path of RPC policy file

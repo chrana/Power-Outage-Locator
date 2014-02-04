@@ -1,0 +1,2 @@
+serviceClass: com.power.outage.locator.client.PowerOutageService
+path: A845841487ABCF71AA22D9B13A4A29FC.gwt.rpc
