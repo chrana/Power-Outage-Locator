@@ -13,8 +13,8 @@ import com.power.outage.locator.client.model.Notes;
 public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 		PowerOutageService {
 
-	private Functions FUNCTIONS = new Functions("localhost", "powerplusdb",
-			"root", "root");
+	private Functions FUNCTIONS = new Functions("PowerPlus.cloudapp.net", "powerplusdb",
+			"chrana", "root");
 
 	private static final long serialVersionUID = 2720413082357820775L;
 

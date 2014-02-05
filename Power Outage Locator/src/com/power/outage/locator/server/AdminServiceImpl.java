@@ -18,18 +18,19 @@ public class AdminServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public boolean checkCredentials(String userName, String password) {
 		Boolean result = false;
-		
+
 		try {
 			ResultSet response = FUNCTIONS.authenticate(userName);
-			if(response.next()){
-				if(Encryption.validatePassword(password, response.getString("password"))){
+			if (response.next()) {
+				if (Encryption.validatePassword(password,
+						response.getString("password"))) {
 					result = true;
 				}
 			}
-		} catch (ClassNotFoundException | SQLException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+		} catch (ClassNotFoundException | SQLException
+				| NoSuchAlgorithmException | InvalidKeySpecException e) {
 			e.printStackTrace();
 		}
-		
 		return result;
 	}
 }
