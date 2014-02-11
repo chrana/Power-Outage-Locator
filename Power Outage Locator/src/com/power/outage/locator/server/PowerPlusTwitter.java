@@ -6,9 +6,12 @@ import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class PowerPlusTwitter {
-	
-	public static void updateStatus(String latestStatus) throws TwitterException{
-		
+
+	private static PowerPlusTwitter powerPlusTwitterInstance = null;
+	private Twitter twitter;
+
+	private PowerPlusTwitter() {
+
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 				.setOAuthConsumerKey("WMlsAmzsJILmmjdpUuSPfg")
@@ -19,7 +22,21 @@ public class PowerPlusTwitter {
 				.setOAuthAccessTokenSecret(
 						"MFSLKy8fODUmB79noHZy3D1GjJkf9Wvl80iod3ZVUtm58");
 		TwitterFactory tf = new TwitterFactory(cb.build());
-		Twitter twitter = tf.getInstance();
+		twitter = tf.getInstance();
+	}
+
+	public static PowerPlusTwitter getSingelton() {
+
+		if (powerPlusTwitterInstance == null) {
+			powerPlusTwitterInstance = new PowerPlusTwitter();
+			return powerPlusTwitterInstance;
+		} else {
+			return powerPlusTwitterInstance;
+		}
+	}
+
+	public void updateStatus(String latestStatus) throws TwitterException {
+
 		twitter.updateStatus(latestStatus);
 	}
 

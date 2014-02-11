@@ -30,7 +30,7 @@
   
   <!-- Default page to serve -->
   <welcome-file-list>
-    <welcome-file>Power_Outage_Locator.html</welcome-file>
+    <welcome-file>Home.html</welcome-file>
   </welcome-file-list>
 
 </web-app>

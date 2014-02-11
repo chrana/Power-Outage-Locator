@@ -4,5 +4,5 @@
 	<inherits name="com.google.gwt.user.User" />
 	<source path="client" />
 	<entry-point
-		class="com.power.outage.locator.client.Power_Outage_Locator_Admin" />
+		class="com.power.outage.locator.client.admin.Power_Outage_Locator_Admin" />
 </module>

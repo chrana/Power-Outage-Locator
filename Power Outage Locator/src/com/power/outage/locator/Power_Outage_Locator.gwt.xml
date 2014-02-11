@@ -10,11 +10,13 @@
 		src="http://maps.google.com/maps?gwt=1&amp;file=api&amp;v=2&amp;sensor=false" />
 	<inherits name='com.google.maps.gwt.GoogleMaps' />
 	<script src="http://maps.google.com/maps/api/js?sensor=false" />
-	
-	<inherits name='com.google.gwt.user.theme.clean.Clean' />
+
+	<inherits name="com.google.code.gwt.geolocation.Html5Geolocation" />
+
 
 	<!-- Specify the app entry point class. -->
 	<entry-point class='com.power.outage.locator.client.Power_Outage_Locator' />
+	<extend-property name="locale" values="fr_CA" />
 
 	<source path='client' />
 	<source path='shared' />

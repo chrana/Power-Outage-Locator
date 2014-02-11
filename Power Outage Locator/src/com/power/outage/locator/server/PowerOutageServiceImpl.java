@@ -13,8 +13,8 @@ import com.power.outage.locator.client.model.Notes;
 public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 		PowerOutageService {
 
-	private Functions FUNCTIONS = new Functions("PowerPlus.cloudapp.net", "powerplusdb",
-			"chrana", "root");
+	private DBManager DBManagerInstance = new DBManager("localhost",
+			"powerplusdb", "root", "root");
 
 	private static final long serialVersionUID = 2720413082357820775L;
 
@@ -23,7 +23,8 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 		ArrayList<Coordinates> result = new ArrayList<Coordinates>();
 
 		try {
-			ResultSet serverResult = FUNCTIONS
+			DBManagerInstance.connect();
+			ResultSet serverResult = DBManagerInstance
 					.getCoordinatesByAreaName(areaName);
 			while (serverResult.next()) {
 				Double lat = serverResult.getDouble("Latitude");
@@ -33,10 +34,16 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 			}
 
 			serverResult.close();
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+			if (DBManagerInstance != null)
+				try {
+					DBManagerInstance.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 		}
-
 		return result;
 	}
 
@@ -45,15 +52,22 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 		ArrayList<String> result = new ArrayList<String>();
 
 		try {
-			ResultSet serverResult = FUNCTIONS.getAllTheAreaNames();
+			DBManagerInstance.connect();
+			ResultSet serverResult = DBManagerInstance.getAllTheAreaNames();
 			while (serverResult.next()) {
 				result.add(serverResult.getString("AreaName"));
 			}
 			serverResult.close();
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+			if (DBManagerInstance != null)
+				try {
+					DBManagerInstance.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 		}
-
 		return result;
 	}
 
@@ -77,18 +91,26 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 		ArrayList<Notes> result = new ArrayList<Notes>();
 
 		try {
-			ResultSet serverResult = FUNCTIONS.getNotesByAreaName(areaName);
+			DBManagerInstance.connect();
+			ResultSet serverResult = DBManagerInstance
+					.getNotesByAreaName(areaName);
 			while (serverResult.next()) {
 				result.add(new Notes(serverResult.getInt("notesID"),
 						serverResult.getString("notes"), serverResult
 								.getInt("outageID")));
 			}
 			serverResult.close();
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+			if (DBManagerInstance != null)
+				try {
+					DBManagerInstance.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 		}
 
 		return result;
 	}
-
 }

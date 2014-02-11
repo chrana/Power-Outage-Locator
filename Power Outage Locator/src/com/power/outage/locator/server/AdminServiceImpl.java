@@ -6,30 +6,38 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.power.outage.locator.client.AdminService;
+import com.power.outage.locator.client.admin.AdminService;
 
 public class AdminServiceImpl extends RemoteServiceServlet implements
 		AdminService {
 
 	private static final long serialVersionUID = 3231950922074455610L;
-	private Functions FUNCTIONS = new Functions("localhost", "powerplusdb",
-			"root", "root");
+	private DBManager DBManagerInstance = new DBManager("localhost",
+			"powerplusdb", "root", "root");
 
 	@Override
 	public boolean checkCredentials(String userName, String password) {
 		Boolean result = false;
 
 		try {
-			ResultSet response = FUNCTIONS.authenticate(userName);
+			DBManagerInstance.connect();
+			ResultSet response = DBManagerInstance.authenticate(userName);
 			if (response.next()) {
 				if (Encryption.validatePassword(password,
 						response.getString("password"))) {
 					result = true;
 				}
 			}
-		} catch (ClassNotFoundException | SQLException
-				| NoSuchAlgorithmException | InvalidKeySpecException e) {
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException
+				| SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+			if (DBManagerInstance != null)
+				try {
+					DBManagerInstance.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 		}
 		return result;
 	}

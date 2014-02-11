@@ -1,0 +1,2 @@
+serviceClass: com.power.outage.locator.client.admin.AdminService
+path: FE2A62641F167F968EE0800A105DA8DD.gwt.rpc

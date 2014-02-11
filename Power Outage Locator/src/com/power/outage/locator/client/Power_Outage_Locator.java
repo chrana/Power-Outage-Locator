@@ -3,6 +3,10 @@ package com.power.outage.locator.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.google.code.gwt.geolocation.client.Geolocation;
+import com.google.code.gwt.geolocation.client.Position;
+import com.google.code.gwt.geolocation.client.PositionCallback;
+import com.google.code.gwt.geolocation.client.PositionError;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -16,18 +20,22 @@ import com.google.gwt.maps.client.event.PolygonClickHandler;
 import com.google.gwt.maps.client.event.PolygonMouseOutHandler;
 import com.google.gwt.maps.client.event.PolygonMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.PolyStyleOptions;
 import com.google.gwt.maps.client.overlay.Polygon;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.power.outage.locator.client.model.Area;
 import com.power.outage.locator.client.model.Coordinates;
 import com.power.outage.locator.client.model.Notes;
+import com.power.outage.locator.client.model.PowerPlusConstants;
 import com.power.outage.locator.client.model.PowerPlusManager;
 
 /**
@@ -35,58 +43,93 @@ import com.power.outage.locator.client.model.PowerPlusManager;
  */
 public class Power_Outage_Locator implements EntryPoint {
 
-	PowerOutageServiceAsync powerPlusService = GWT
+	private PowerOutageServiceAsync powerPlusService = GWT
 			.create(PowerOutageService.class);
 
-	MapWidget map = null;
-	HashMap<String, Polygon> polygonMap = new HashMap<String, Polygon>();
-	PowerPlusManager manager = new PowerPlusManager();
-	HTML lblLegend;
+	private MapWidget map;
+	private RootPanel rootPannel;
+	private HashMap<String, Polygon> polygonMap = new HashMap<String, Polygon>();
+	private PowerPlusManager manager = new PowerPlusManager();
+	private HTML lblInfo;
+	private LatLng defaultLocation;
+	private PowerPlusConstants constants = GWT.create(PowerPlusConstants.class);
 
 	/**
 	 * @wbp.parser.entryPoint
 	 */
+	@Override
 	public void onModuleLoad() {
+		rootPannel = RootPanel.get("bodyContent");
 
-		getAllAreas();
-		// Map Key
-		Maps.loadMapsApi("AIzaSyC-fM_2v4Q399Yy2paZWahqFZm7HXoOBe4", "2", false,
-				new Runnable() {
-					public void run() {
-						buildUi();
-					}
-				});
+		try {
+			getAllAreas();
+			Maps.loadMapsApi("AIzaSyC-fM_2v4Q399Yy2paZWahqFZm7HXoOBe4", "2",
+					false, new Runnable() {
+						public void run() {
+							getLocation();
+						}
+					});
+		} catch (Exception e) {
+			Window.alert(constants.serverError());
+		}
 	}
 
-	private void buildUi() {
+	private void getLocation() {
+		Geolocation geo = Geolocation.getGeolocation();
+		geo.getCurrentPosition(new PositionCallback() {
 
-		RootPanel rootPannel = RootPanel.get("bodyContent");
+			@Override
+			public void onSuccess(Position position) {
+				defaultLocation = LatLng.newInstance(position.getCoords()
+						.getLatitude(), position.getCoords().getLongitude());
+				buildUI();
+			}
+
+			@Override
+			public void onFailure(PositionError error) {
+				defaultLocation = LatLng.newInstance(43.77510197731525,
+						-79.13471796520389);
+				Window.alert("Couldn't get Location");
+				buildUI();
+
+			}
+		});
+	}
+
+	private void buildUI() {
+
 		rootPannel.clear();
 		rootPannel.setStyleName((String) null);
 
-		Label lblLogo = new Label("LOGO");
-		Label lblQuickLinks = new Label("QuickLinks");
-		Label lblNavMenu = new Label("Navigation Menu");
-		lblLegend = new HTML("Legends and Information");
-		Label lblFooter = new Label("Footer (If NEEDED)");
+		Label lblLogo = new Label(constants.logo());
+		Label lblQuickLinks = new Label(constants.quickLinks());
+		HorizontalPanel navigationPannel = new HorizontalPanel();
+		Anchor hypHome = new Anchor(constants.home(), "Home.html");
+		Anchor hypAdmin = new Anchor(constants.admin(), "Admin.html");
+		navigationPannel.add(hypHome);
+		navigationPannel.add(hypAdmin);
+		lblInfo = new HTML("");
+		Label lblFooter = new Label(constants.disclaimer());
 
 		SimplePanel widg = new SimplePanel();
 
 		widg.setSize("100%", "100%");
 
-		LatLng apl = LatLng.newInstance(43.77510197731525, -79.13471796520389);
-		map = new MapWidget(apl, 11);
+		Marker myMarker = new Marker(defaultLocation);
+
+		map = new MapWidget(defaultLocation, 11);
 		map.setSize("100%", "100%");
 		map.addControl(new LargeMapControl());
+		map.addOverlay(myMarker);
 		widg.add(map);
 
 		FlexTable contentFlexTable = new FlexTable();
 
 		contentFlexTable.setWidget(0, 0, lblLogo);
 		contentFlexTable.setWidget(0, 1, lblQuickLinks);
-		contentFlexTable.setWidget(1, 0, lblNavMenu);
+		contentFlexTable.setWidget(1, 0, navigationPannel);
 		contentFlexTable.setWidget(2, 0, widg);
-		contentFlexTable.setWidget(2, 1, lblLegend);
+		contentFlexTable.setWidget(2, 1, lblInfo);
 		contentFlexTable.setWidget(4, 0, lblFooter);
 
 		// Adding Twitter
@@ -110,7 +153,7 @@ public class Power_Outage_Locator implements EntryPoint {
 		contentFlexTable.getFlexCellFormatter().setRowSpan(2, 0, 2);
 
 		rootPannel.add(contentFlexTable);
-		lblLegend.setWordWrap(true);
+		lblInfo.setWordWrap(true);
 	}
 
 	private void getAllAreas() {
@@ -119,8 +162,7 @@ public class Power_Outage_Locator implements EntryPoint {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert("Error connecting to the server\n"
-						+ caught.toString());
+				Window.alert(constants.serverError() + caught.toString());
 			}
 
 			@Override
@@ -161,8 +203,8 @@ public class Power_Outage_Locator implements EntryPoint {
 									PolyStyleOptions.newInstance(null, 0, 0.4));
 							infoWindow
 									.open(polygonMap.get(key).getVertex(2),
-											new InfoWindowContent(
-													"Click For More Info"));
+											new InfoWindowContent(constants
+													.moreInfo()));
 						}
 
 					});
@@ -177,7 +219,6 @@ public class Power_Outage_Locator implements EntryPoint {
 							infoWindow.close();
 
 						}
-
 					});
 
 			polygonMap.get(key).addPolygonClickHandler(
@@ -185,29 +226,26 @@ public class Power_Outage_Locator implements EntryPoint {
 
 						@Override
 						public void onClick(PolygonClickEvent event) {
-							lblLegend.setHTML("<strong>" + key
+							lblInfo.setHTML("<strong>" + key
 									+ "</strong><br />");
 
 							AsyncCallback<ArrayList<Notes>> callback = new AsyncCallback<ArrayList<Notes>>() {
 
 								@Override
 								public void onFailure(Throwable caught) {
-									Window.alert("Error connecting to the server"
+									Window.alert(constants.serverError()
 											+ caught.toString());
 								}
 
 								@Override
 								public void onSuccess(ArrayList<Notes> result) {
 									for (Notes notes : result) {
-										lblLegend.setHTML(lblLegend.getHTML()
+										lblInfo.setHTML(lblInfo.getHTML()
 												+ notes.getNotes() + "<br />");
 									}
-
 								}
 							};
 							powerPlusService.getNotesByAreaName(key, callback);
-							;
-
 						}
 
 					});

@@ -1,5 +1,4 @@
 package com.power.outage.locator.client;
-
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.RemoteService;
