@@ -184,7 +184,7 @@ public class Power_Outage_Locator implements EntryPoint {
 				refreshMap();
 			}
 		};
-		powerPlusService.getAllAreas(callback);
+		powerPlusService.getAllAreasWithCoordinates(callback);
 	}
 
 	private void refreshMap() {

@@ -1,3 +1,2 @@
 # Module power_outage_locator
 # RPC service class, partial path of RPC policy file
-com.power.outage.locator.client.PowerOutageService, A845841487ABCF71AA22D9B13A4A29FC.gwt.rpc

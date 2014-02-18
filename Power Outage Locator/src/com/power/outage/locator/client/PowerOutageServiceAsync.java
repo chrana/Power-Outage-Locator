@@ -15,7 +15,7 @@ public interface PowerOutageServiceAsync {
 	
 	void getAreaNames(AsyncCallback<ArrayList<String>> callback);
 	
-	void getAllAreas(AsyncCallback<ArrayList<Area>> callback);
+	void getAllAreasWithCoordinates(AsyncCallback<ArrayList<Area>> callback);
 	
 	void getNotesByAreaName(String areaName, AsyncCallback<ArrayList<Notes>> callback);
 

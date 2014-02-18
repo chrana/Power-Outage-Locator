@@ -1,25 +1,27 @@
 package com.power.outage.locator.client.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class Outage implements IsSerializable {
 
-	public int outageID;
-	public String areaName;
-	public Date outageStartDate;
-	public boolean outageStatus;
-	public Date outageEndDate;
-	public int affectedCustomers;
+	private int outageID;
+	private String areaName;
+	private Date outageStartDate;
+	private boolean outageStatus;
+	private Date outageEndDate;
+	private int affectedCustomers;
+	private ArrayList<Notes> notes;
 	
-	public Outage(){
-		
+
+	public Outage() {
+
 	}
-	
+
 	public Outage(int outageID, String areaName, Date outageStartDate,
-			boolean outageStatus, Date outageEndDate, String notes,
-			int affectedCustomers) {
+			boolean outageStatus, Date outageEndDate, int affectedCustomers, ArrayList<Notes> notes) {
 		super();
 		this.outageID = outageID;
 		this.areaName = areaName;
@@ -27,9 +29,15 @@ public class Outage implements IsSerializable {
 		this.outageStatus = outageStatus;
 		this.outageEndDate = outageEndDate;
 		this.affectedCustomers = affectedCustomers;
+		this.notes = notes;
 	}
-	
-	
+
+	public Outage(String areasName, Date date, int affectedCustomers) {
+		this.areaName = areasName;
+		this.outageStartDate = date;
+		this.affectedCustomers = affectedCustomers;
+	}
+
 	public int getOutageID() {
 		return outageID;
 	}
@@ -76,5 +84,13 @@ public class Outage implements IsSerializable {
 
 	public void setAffectedCustomers(int affectedCustomers) {
 		this.affectedCustomers = affectedCustomers;
+	}
+
+	public ArrayList<Notes> getNotes() {
+		return notes;
+	}
+
+	public void addNote(Notes note) {
+		getNotes().add(note);
 	}
 }

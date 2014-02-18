@@ -15,11 +15,12 @@ public class DBManager {
 	private String password;
 	private Connection connection;
 
-	private final String GET_ALL_AREA_NAMES = "SELECT * FROM `powerplusdb`.`areas`";
+	private final String GET_ALL_AREAS = "SELECT * FROM `powerplusdb`.`areas`";
 	private final String GET_COORDINATES_BY_AREA = "SELECT * FROM `powerplusdb`.`coordinates` WHERE `AreaName` = ?";
-	private final String GET_OUTAGE_BY_AREA = "SELECT * FROM `powerplusdb`.`outage` WHERE `AreaName` = ?";
 	private final String GET_NOTES_BY_AREA = "SELECT * FROM `powerplusdb`.`notes` INNER JOIN `powerplusdb`.`outage` ON `powerplusdb`.`notes`.`outageID` = `powerplusdb`.`outage`.`OutageID` WHERE `powerplusdb`.`outage`.`AreaName` = ? AND `powerplusdb`.`outage`.`OutageActive` = 1";
 	private final String AUTHENTICATE_USER = "CALL authenticateUser(?)";
+	private final String GET_ALL_OUTAGES = "CALL getAllOutages()";
+	private final String INSERT_NEW_OUTAGE = "CALL `powerplusdb`.`insertNewOutage`(?, ?, ?)";
 
 	public DBManager(String serverName, String dbContext, String userName,
 			String password) {
@@ -48,19 +49,9 @@ public class DBManager {
 		return result;
 	}
 
-	public ResultSet getAllTheAreaNames() throws SQLException,
-			ClassNotFoundException {
+	public ResultSet getAllAreas() throws SQLException, ClassNotFoundException {
 		PreparedStatement selectStatement = connection
-				.prepareStatement(GET_ALL_AREA_NAMES);
-		ResultSet result = selectStatement.executeQuery();
-		return result;
-	}
-
-	public ResultSet getOutageByAreaName(String areaName)
-			throws ClassNotFoundException, SQLException {
-		PreparedStatement selectStatement = connection
-				.prepareStatement(GET_OUTAGE_BY_AREA);
-		selectStatement.setString(1, areaName);
+				.prepareStatement(GET_ALL_AREAS);
 		ResultSet result = selectStatement.executeQuery();
 		return result;
 	}
@@ -83,7 +74,25 @@ public class DBManager {
 		return result;
 	}
 
+	public ResultSet getAllOutages() throws ClassNotFoundException,
+			SQLException {
+		CallableStatement storedProcedureCall = connection
+				.prepareCall(GET_ALL_OUTAGES);
+		ResultSet result = storedProcedureCall.executeQuery();
+		return result;
+	}
+
+	public int inserNewOutage(String areaName, String d, int customers) throws ClassNotFoundException, SQLException {
+		CallableStatement storedProcedureCall = connection
+				.prepareCall(INSERT_NEW_OUTAGE);
+		storedProcedureCall.setString(1, areaName);
+		storedProcedureCall.setString(2, d);
+		storedProcedureCall.setInt(3, customers);
+		return storedProcedureCall.executeUpdate();
+	}
+
 	public void close() throws SQLException {
+		connection.close();
 	}
 
 }

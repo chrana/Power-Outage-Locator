@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.power.outage.locator.client.PowerOutageService;
 import com.power.outage.locator.client.model.Area;
@@ -13,8 +14,8 @@ import com.power.outage.locator.client.model.Notes;
 public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 		PowerOutageService {
 
-	private DBManager DBManagerInstance = new DBManager("localhost",
-			"powerplusdb", "root", "root");
+	private DBManager DBManagerInstance = new DBManager("PowerPlus.cloudapp.net",
+			"powerplusdb", "chrana", "root");
 
 	private static final long serialVersionUID = 2720413082357820775L;
 
@@ -41,7 +42,7 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 				try {
 					DBManagerInstance.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					Window.alert("Error Disconnect");
 				}
 		}
 		return result;
@@ -53,7 +54,7 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 
 		try {
 			DBManagerInstance.connect();
-			ResultSet serverResult = DBManagerInstance.getAllTheAreaNames();
+			ResultSet serverResult = DBManagerInstance.getAllAreas();
 			while (serverResult.next()) {
 				result.add(serverResult.getString("AreaName"));
 			}
@@ -65,14 +66,14 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 				try {
 					DBManagerInstance.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					Window.alert("Error Disconnect");
 				}
 		}
 		return result;
 	}
 
 	@Override
-	public ArrayList<Area> getAllAreas() {
+	public ArrayList<Area> getAllAreasWithCoordinates() {
 
 		ArrayList<Area> result = new ArrayList<Area>();
 		ArrayList<String> areaNames = getAreaNames();
@@ -95,9 +96,11 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 			ResultSet serverResult = DBManagerInstance
 					.getNotesByAreaName(areaName);
 			while (serverResult.next()) {
-				result.add(new Notes(serverResult.getInt("notesID"),
-						serverResult.getString("notes"), serverResult
-								.getInt("outageID")));
+				result.add(new Notes(
+						serverResult.getInt("notesID"),
+						serverResult.getString("notes"), 
+						serverResult.getInt("outageID"))
+				);
 			}
 			serverResult.close();
 		} catch (SQLException | ClassNotFoundException e) {
@@ -107,7 +110,7 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 				try {
 					DBManagerInstance.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					Window.alert("Error Disconnect");
 				}
 		}
 
