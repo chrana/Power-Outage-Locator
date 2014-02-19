@@ -1,4 +1,4 @@
-package com.power.plus;
+package com.power.plus.fragment;
 
 import com.power.plus.R;
 
@@ -13,7 +13,6 @@ public class OutageInfoFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
 		View v = inflater.inflate(R.layout.fragment_outage_info, container,
 				false);
 		return v;
