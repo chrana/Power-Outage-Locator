@@ -5,12 +5,15 @@ import java.sql.Date;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -20,33 +23,40 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.power.outage.locator.client.model.Notes;
 import com.power.outage.locator.client.model.Outage;
+import com.power.outage.locator.client.model.PowerPlusConstants;
 
 public class Power_Outage_Locator_Admin implements EntryPoint {
 
 	private RootPanel rootPanel;
 	private FlexTable flexTable = new FlexTable();
+	private FlexTable contentFlexTable = new FlexTable();
 	private TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(1.5, Unit.EM);
 	private AdminServiceAsync powerPlusService = GWT.create(AdminService.class);
+	private PowerPlusConstants constants = GWT.create(PowerPlusConstants.class);
 
 	@Override
 	public void onModuleLoad() {
 
-		rootPanel = RootPanel.get();
+		rootPanel = RootPanel.get("bodyContent");
+		buildUI();
 
 		HorizontalPanel horizontalPanel = new HorizontalPanel();
-		rootPanel.add(horizontalPanel, 10, 10);
-		horizontalPanel.setSize("470px", "212px");
-
 		VerticalPanel verticalPanel = new VerticalPanel();
 		horizontalPanel.add(verticalPanel);
-
-		Label lblWelcomeToThe = new Label("Administrator Page");
-		lblWelcomeToThe.setStyleName("gwt-Label-Login");
-		verticalPanel.add(lblWelcomeToThe);
-		lblWelcomeToThe.setSize("226px", "124px");
-
 		final Login login = new Login();
+		
 		horizontalPanel.add(login);
+		Label lblWelcomeToThe = new Label(constants.admin());
+
+		verticalPanel.add(lblWelcomeToThe);
+		contentFlexTable.setWidget(3, 0, horizontalPanel);
+
+		lblWelcomeToThe.setStyleName("gwt-Label-Login");
+		horizontalPanel.setStyleName("logInTable");
+		lblWelcomeToThe.setSize("226px", "124px");
+		
+		rootPanel.add(contentFlexTable);
+
 
 		login.getBtnSignIn().addClickHandler(new ClickHandler() {
 
@@ -58,10 +68,7 @@ public class Power_Outage_Locator_Admin implements EntryPoint {
 					@Override
 					public void onSuccess(Boolean result) {
 						if (result) {
-							flexTable.clear();
-							rootPanel.clear();
 							loadCurrentOutage();
-							loadNewOutage();
 						} else {
 							login.getTextBoxPassword().setText("");
 							login.getTextBoxUsername().setText("");
@@ -80,12 +87,36 @@ public class Power_Outage_Locator_Admin implements EntryPoint {
 			}
 
 		});
+		
+		horizontalPanel.getElement().getStyle().setPosition(Position.RELATIVE);
+	}
+	
+	private void buildUI(){
+		
+		Label lblLogo = new Label(constants.logo());
+		Label lblQuickLinks = new Label(constants.quickLinks());
+		FlowPanel navigationPannel = new FlowPanel();
+		Anchor hypHome = new Anchor(constants.home(), "Home.html");
+		Anchor hypAdmin = new Anchor(constants.admin(), "Admin.html");
+		navigationPannel.add(hypHome);
+		navigationPannel.add(hypAdmin);
+		
+		contentFlexTable.setWidget(0, 0, lblLogo);
+		contentFlexTable.setWidget(0, 2, lblQuickLinks);
+		contentFlexTable.setWidget(1, 0, navigationPannel);
+		contentFlexTable.setWidget(1, 2, null);
+		
+		contentFlexTable.getRowFormatter().setStyleName(0, "logoRow");
+		contentFlexTable.getRowFormatter().setStyleName(1, "topnav");
+		contentFlexTable.setCellSpacing(0);
+		contentFlexTable.getRowFormatter().setStyleName(2, "borderRow");
+		contentFlexTable.getFlexCellFormatter().setColSpan(2, 0, 3);
+		
+		rootPanel.add(contentFlexTable);
+
 	}
 
 	private void loadCurrentOutage() {
-
-		Label lblAdminHeader = new Label("Administrator Page");
-		flexTable.setWidget(0, 0, lblAdminHeader);
 
 		final StackLayoutPanel stackLayoutCurrentOutages = new StackLayoutPanel(
 				Unit.EM);
@@ -105,6 +136,7 @@ public class Power_Outage_Locator_Admin implements EntryPoint {
 					tabLayoutPanel.add(stackLayoutCurrentOutages, new HTML(
 							"Current Outages"));
 				}
+				loadNewOutage();
 
 			}
 
@@ -126,7 +158,7 @@ public class Power_Outage_Locator_Admin implements EntryPoint {
 		tabLayoutPanel.setSize("70%", "500px");
 
 		flexTable.setWidget(1, 0, tabLayoutPanel);
-		rootPanel.add(flexTable);
+		contentFlexTable.setWidget(3, 0, flexTable);
 
 		AsyncCallback<ArrayList<String>> newOutageAreaCallBack = new AsyncCallback<ArrayList<String>>() {
 			@Override

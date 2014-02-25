@@ -27,8 +27,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -53,16 +53,14 @@ public class Power_Outage_Locator implements EntryPoint {
 	private HTML lblInfo;
 	private LatLng defaultLocation;
 	private PowerPlusConstants constants = GWT.create(PowerPlusConstants.class);
+	private ArrayList<String> outageNames = new ArrayList<String>();
 
-	/**
-	 * @wbp.parser.entryPoint
-	 */
 	@Override
 	public void onModuleLoad() {
 		rootPannel = RootPanel.get("bodyContent");
 
 		try {
-			getAllAreas();
+			getAllOutageNames();
 			Maps.loadMapsApi("AIzaSyC-fM_2v4Q399Yy2paZWahqFZm7HXoOBe4", "2",
 					false, new Runnable() {
 						public void run() {
@@ -72,6 +70,24 @@ public class Power_Outage_Locator implements EntryPoint {
 		} catch (Exception e) {
 			Window.alert(constants.serverError());
 		}
+	}
+
+	private void getAllOutageNames() {
+
+		AsyncCallback<ArrayList<String>> callback = new AsyncCallback<ArrayList<String>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				Window.alert("Error outage names");
+			}
+
+			@Override
+			public void onSuccess(ArrayList<String> result) {
+				outageNames = result;
+				getAllAreas();
+			}
+		};
+		powerPlusService.getAllOutageNames(callback);
 	}
 
 	private void getLocation() {
@@ -98,16 +114,10 @@ public class Power_Outage_Locator implements EntryPoint {
 
 	private void buildUI() {
 
-		rootPannel.clear();
-		rootPannel.setStyleName((String) null);
-
 		Label lblLogo = new Label(constants.logo());
 		Label lblQuickLinks = new Label(constants.quickLinks());
-		HorizontalPanel navigationPannel = new HorizontalPanel();
 		Anchor hypHome = new Anchor(constants.home(), "Home.html");
 		Anchor hypAdmin = new Anchor(constants.admin(), "Admin.html");
-		navigationPannel.add(hypHome);
-		navigationPannel.add(hypAdmin);
 		lblInfo = new HTML("");
 		Label lblFooter = new Label(constants.disclaimer());
 
@@ -124,18 +134,23 @@ public class Power_Outage_Locator implements EntryPoint {
 		widg.add(map);
 
 		FlexTable contentFlexTable = new FlexTable();
+		FlowPanel navigationPannel = new FlowPanel();
+		navigationPannel.add(hypHome);
+		navigationPannel.add(hypAdmin);
 
 		contentFlexTable.setWidget(0, 0, lblLogo);
-		contentFlexTable.setWidget(0, 1, lblQuickLinks);
+		contentFlexTable.setWidget(0, 2, lblQuickLinks);
 		contentFlexTable.setWidget(1, 0, navigationPannel);
-		contentFlexTable.setWidget(2, 0, widg);
-		contentFlexTable.setWidget(2, 1, lblInfo);
-		contentFlexTable.setWidget(4, 0, lblFooter);
+		contentFlexTable.setWidget(1, 2, null);
+		contentFlexTable.setWidget(2, 0, null);
+		contentFlexTable.setWidget(3, 0, widg);
+		contentFlexTable.setWidget(3, 1, lblInfo);
+		contentFlexTable.setWidget(6, 0, lblFooter);
 
 		// Adding Twitter
 		String s = "<a class=\"twitter-timeline\" href=\"https://twitter.com/PowerPlusGTA/powerpluslist\" data-widget-id=\"430374450886754304\">Tweets from https://twitter.com/PowerPlusGTA/powerpluslist</a>";
 		HTML h = new HTML(s);
-		contentFlexTable.setWidget(3, 0, h);
+		contentFlexTable.setWidget(5, 0, h);
 
 		Document doc = Document.get();
 		ScriptElement script = doc.createScriptElement();
@@ -145,12 +160,17 @@ public class Power_Outage_Locator implements EntryPoint {
 		doc.getBody().appendChild(script);
 
 		// Styling
-		lblQuickLinks.setStyleName("rightAlign");
-		contentFlexTable.getFlexCellFormatter().setStyleName(2, 0, "majorRow");
-		contentFlexTable.getFlexCellFormatter().setStyleName(2, 1,
+		// lblQuickLinks.setStyleName("rightAlign");
+		contentFlexTable.getRowFormatter().setStyleName(0, "logoRow");
+		contentFlexTable.getFlexCellFormatter().setStyleName(3, 0, "majorRow");
+		contentFlexTable.getFlexCellFormatter().setStyleName(3, 1,
 				"information");
-		contentFlexTable.getFlexCellFormatter().setColSpan(1, 0, 2);
-		contentFlexTable.getFlexCellFormatter().setRowSpan(2, 0, 2);
+		contentFlexTable.getFlexCellFormatter().setRowSpan(3, 0, 3);
+		contentFlexTable.getFlexCellFormatter().setColSpan(3, 0, 2);
+		contentFlexTable.getRowFormatter().setStyleName(1, "topnav");
+		contentFlexTable.setCellSpacing(0);
+		contentFlexTable.getRowFormatter().setStyleName(2, "borderRow");
+		contentFlexTable.getFlexCellFormatter().setColSpan(2, 0, 3);
 
 		rootPannel.add(contentFlexTable);
 		lblInfo.setWordWrap(true);
@@ -162,7 +182,7 @@ public class Power_Outage_Locator implements EntryPoint {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert(constants.serverError() + caught.toString());
+				Window.alert("Error getting region coordinates from the server");
 			}
 
 			@Override
@@ -178,8 +198,13 @@ public class Power_Outage_Locator implements EntryPoint {
 								.getLatitude(), coordinates.get(i)
 								.getLongitude());
 					}
-					polygonMap.put(area.getAreaName(), new Polygon(poly,
-							"#000000", 1, 1.0, "#000000", 0));
+					if (outageNames.contains(area.getAreaName())) {
+						polygonMap.put(area.getAreaName(), new Polygon(poly,
+								"#000000", 1, 0.3, "#FF0000", 0.3));
+					} else {
+						polygonMap.put(area.getAreaName(), new Polygon(poly,
+								"#000000", 1, 0.3, "#000000", 0));
+					}
 				}
 				refreshMap();
 			}
@@ -214,8 +239,11 @@ public class Power_Outage_Locator implements EntryPoint {
 
 						@Override
 						public void onMouseOut(PolygonMouseOutEvent event) {
-							polygonMap.get(key).setFillStyle(
-									PolyStyleOptions.newInstance(null, 0, 0));
+							if (!outageNames.contains(key)) {
+								polygonMap.get(key).setFillStyle(
+										PolyStyleOptions
+												.newInstance(null, 0, 0));
+							}
 							infoWindow.close();
 
 						}
@@ -233,8 +261,7 @@ public class Power_Outage_Locator implements EntryPoint {
 
 								@Override
 								public void onFailure(Throwable caught) {
-									Window.alert(constants.serverError()
-											+ caught.toString());
+									Window.alert("Error getting nots from the server");
 								}
 
 								@Override

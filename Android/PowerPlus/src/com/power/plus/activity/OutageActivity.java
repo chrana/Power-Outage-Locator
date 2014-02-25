@@ -1,39 +1,41 @@
 package com.power.plus.activity;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.DrawerLayout;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
-import android.widget.TextView;
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
+import android.widget.ListView;
 import com.power.plus.R;
 
-public class OutageActivity extends FragmentActivity implements
-		OnMapClickListener {
+@TargetApi(19)
+public class OutageActivity extends FragmentActivity {
 
-	private View mDecorView;
+	private DrawerLayout mDrawerLayout;
+	private CharSequence mTitle;
+	private String[] mNavTitles = { "View Outage", "Add Outage" };
+	private ListView mDrawerList;
+	private View outageView;
 	private static final int INITIAL_HIDE_DELAY = 3000;
-	private GoogleMap mMap;
-	private LinearLayout infoLayout =null;
-	private TextView txtInfo = null;
+	private ActionBarDrawerToggle mDrawerToggle;
+	LinearLayout currentOutageLayout;
+	LinearLayout newOutageLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_outage);
-		
-		txtInfo = (TextView)findViewById(R.id.txtInfo);
-		mDecorView = getWindow().getDecorView();
+		setContentView(R.layout.activity_main);
 
-		mDecorView
+		outageView = getWindow().getDecorView();
+
+		outageView
 				.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
 					@Override
 					public void onSystemUiVisibilityChange(int visibility) {
@@ -43,29 +45,37 @@ public class OutageActivity extends FragmentActivity implements
 					}
 				});
 
-		SupportMapFragment supportMapFragment = (SupportMapFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.map);
-		mMap = supportMapFragment.getMap();
+		currentOutageLayout = (LinearLayout) findViewById(R.id.current_outage_layout);
+		newOutageLayout = (LinearLayout) findViewById(R.id.new_outage_layout);
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-		infoLayout = (LinearLayout) findViewById(R.id.infoPane);
-		final TextView txtHide = (TextView) findViewById(R.id.txtHide);
-		txtHide.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-						LayoutParams.MATCH_PARENT, 0);
-				params.weight = 0;
-				infoLayout.setLayoutParams(params);
+		mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+				R.layout.drawer_list_item, mNavTitles));
+		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setHomeButtonEnabled(true);
+		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+				R.drawable.ic_drawer, R.string.open_drawer,
+				R.string.closed_drawer) {
+			private CharSequence mDrawerTitle;
+
+			public void onDrawerClosed(View view) {
+				getActionBar().setTitle(mTitle);
+				invalidateOptionsMenu();
 			}
-		});
 
-	}
+			public void onDrawerOpened(View drawerView) {
+				getActionBar().setTitle(mDrawerTitle);
+				invalidateOptionsMenu();
+			}
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		mMap.setOnMapClickListener(this);
-
+		};
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
+		
+		if(savedInstanceState == null){
+			swapFragment(0);
+		}
 	}
 
 	@Override
@@ -80,7 +90,7 @@ public class OutageActivity extends FragmentActivity implements
 	}
 
 	private void hideSystemUI() {
-		mDecorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+		outageView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 				| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 				| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 				| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -102,12 +112,35 @@ public class OutageActivity extends FragmentActivity implements
 		mHideHandler.sendEmptyMessageDelayed(0, delayMillis);
 	}
 
-	@Override
-	public void onMapClick(LatLng point) {
-		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-				LayoutParams.MATCH_PARENT, 0);
-		params.weight = 1;
-		infoLayout.setLayoutParams(params);
-		txtInfo.setText("Info Will Go Here\n"+point.latitude+"\n"+point.longitude);
+	private void swapFragment(int position) {
+		if (position == 0) {
+			newOutageLayout.setVisibility(View.GONE);
+			currentOutageLayout.setVisibility(View.VISIBLE);
+			
+		} else if (position == 1) {
+			
+			newOutageLayout.setVisibility(View.VISIBLE);
+			currentOutageLayout.setVisibility(View.GONE);
+		}
+		mDrawerList.setItemChecked(position, true);
+		setTitle(mNavTitles[position]);
+		mDrawerLayout.closeDrawer(mDrawerList);
 	}
+
+	@Override
+	public void setTitle(CharSequence title) {
+		mTitle = title;
+		getActionBar().setTitle(mTitle);
+	}
+
+	private class DrawerItemClickListener implements
+			ListView.OnItemClickListener {
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			swapFragment(position);
+		}
+	}
+
 }

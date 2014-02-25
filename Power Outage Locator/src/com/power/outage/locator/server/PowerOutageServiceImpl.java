@@ -14,8 +14,8 @@ import com.power.outage.locator.client.model.Notes;
 public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 		PowerOutageService {
 
-	private DBManager DBManagerInstance = new DBManager("PowerPlus.cloudapp.net",
-			"powerplusdb", "chrana", "root");
+	private DBManager DBManagerInstance = new DBManager(
+			"localhost", "powerplusdb", "root", "root");
 
 	private static final long serialVersionUID = 2720413082357820775L;
 
@@ -23,27 +23,29 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 
 		ArrayList<Coordinates> result = new ArrayList<Coordinates>();
 
-		try {
-			DBManagerInstance.connect();
-			ResultSet serverResult = DBManagerInstance
-					.getCoordinatesByAreaName(areaName);
-			while (serverResult.next()) {
-				Double lat = serverResult.getDouble("Latitude");
-				Double lon = serverResult.getDouble("Longitude");
+		if (areaName != null) {
+			try {
+				DBManagerInstance.connect();
+				ResultSet serverResult = DBManagerInstance
+						.getCoordinatesByAreaName(areaName);
+				while (serverResult.next()) {
+					Double lat = serverResult.getDouble("Latitude");
+					Double lon = serverResult.getDouble("Longitude");
 
-				result.add(new Coordinates(lat, lon));
-			}
-
-			serverResult.close();
-		} catch (SQLException | ClassNotFoundException e) {
-			e.printStackTrace();
-		} finally {
-			if (DBManagerInstance != null)
-				try {
-					DBManagerInstance.close();
-				} catch (SQLException e) {
-					Window.alert("Error Disconnect");
+					result.add(new Coordinates(lat, lon));
 				}
+
+				serverResult.close();
+			} catch (SQLException | ClassNotFoundException e) {
+				e.printStackTrace();
+			} finally {
+				if (DBManagerInstance != null)
+					try {
+						DBManagerInstance.close();
+					} catch (SQLException e) {
+						Window.alert("Error Disconnect");
+					}
+			}
 		}
 		return result;
 	}
@@ -96,11 +98,9 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 			ResultSet serverResult = DBManagerInstance
 					.getNotesByAreaName(areaName);
 			while (serverResult.next()) {
-				result.add(new Notes(
-						serverResult.getInt("notesID"),
-						serverResult.getString("notes"), 
-						serverResult.getInt("outageID"))
-				);
+				result.add(new Notes(serverResult.getInt("notesID"),
+						serverResult.getString("notes"), serverResult
+								.getInt("outageID")));
 			}
 			serverResult.close();
 		} catch (SQLException | ClassNotFoundException e) {
@@ -116,4 +116,29 @@ public class PowerOutageServiceImpl extends RemoteServiceServlet implements
 
 		return result;
 	}
+
+	@Override
+	public ArrayList<String> getAllOutageNames() {
+		ArrayList<String> result = new ArrayList<String>();
+
+		try {
+			DBManagerInstance.connect();
+			ResultSet serverOutageResult = DBManagerInstance.getAllOutages();
+			while (serverOutageResult.next()) {
+				result.add(serverOutageResult.getString("AreaName"));
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			e.printStackTrace();
+		} finally {
+			if (DBManagerInstance != null)
+				try {
+					DBManagerInstance.close();
+				} catch (SQLException e) {
+					Window.alert("Error Disconnect");
+				}
+		}
+
+		return result;
+	}
+
 }

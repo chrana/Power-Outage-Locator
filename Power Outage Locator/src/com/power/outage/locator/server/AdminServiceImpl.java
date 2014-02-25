@@ -19,7 +19,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements
 
 	private static final long serialVersionUID = 3231950922074455610L;
 	private DBManager DBManagerInstance = new DBManager(
-			"PowerPlus.cloudapp.net", "powerplusdb", "chrana", "root");
+			"localhost", "powerplusdb", "root", "root");
 
 	@Override
 	public boolean checkCredentials(String userName, String password) {

@@ -14,4 +14,5 @@ public interface PowerOutageService extends RemoteService {
 	ArrayList<String> getAreaNames();
 	ArrayList<Area> getAllAreasWithCoordinates();
 	ArrayList<Notes> getNotesByAreaName(String areaName);
+	ArrayList<String> getAllOutageNames();
 }
