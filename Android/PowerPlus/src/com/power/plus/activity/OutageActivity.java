@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
 import com.power.plus.R;
 
 @TargetApi(19)
@@ -20,7 +21,7 @@ public class OutageActivity extends FragmentActivity {
 
 	private DrawerLayout mDrawerLayout;
 	private CharSequence mTitle;
-	private String[] mNavTitles = { "View Outage", "Add Outage" };
+	private String[] mNavTitles = { "View Outage", "Report New Outage" };
 	private ListView mDrawerList;
 	private View outageView;
 	private static final int INITIAL_HIDE_DELAY = 3000;
@@ -72,9 +73,31 @@ public class OutageActivity extends FragmentActivity {
 
 		};
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
-		
-		if(savedInstanceState == null){
+
+		if (savedInstanceState == null) {
 			swapFragment(0);
+		}
+
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putString("Title", getActionBar().getTitle().toString());
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		
+		if(savedInstanceState.getString("Title").contains("View Outage")){
+			swapFragment(0);
+		}
+		else if(savedInstanceState.getString("Title").contains("Report New Outage")){
+			swapFragment(1);
+		}
+		else {
+			swapFragment(0);		
 		}
 	}
 
@@ -116,9 +139,9 @@ public class OutageActivity extends FragmentActivity {
 		if (position == 0) {
 			newOutageLayout.setVisibility(View.GONE);
 			currentOutageLayout.setVisibility(View.VISIBLE);
-			
+
 		} else if (position == 1) {
-			
+
 			newOutageLayout.setVisibility(View.VISIBLE);
 			currentOutageLayout.setVisibility(View.GONE);
 		}

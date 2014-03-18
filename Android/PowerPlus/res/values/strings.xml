@@ -7,5 +7,14 @@
     <string name="open_drawer">Open Drawer</string>
     <string name="closed_drawer">Closed Drawer</string>
     <string name="hide">Hide</string>
+    <string name="full_name">Full Name</string>
+    <string name="name_here">Name Here</string>
+    <string name="email">Email</string>
+    <string name="email_here">Email Here</string>
+    <string name="address">Address</string>
+    <string name="description">Description</string>
+    <string name="_optional_">(Optional)</string>
+    <string name="report_outage">Report Outage</string>
+    <string name="get_location">Get Location</string>
 
 </resources>
